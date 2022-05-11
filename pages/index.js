@@ -1,4 +1,5 @@
 import * as React from "react";
+
 const TestInput = [
   {
     section: "Basic Information",
@@ -116,7 +117,30 @@ function isTextLetter(inputTxt) {
   }
 }
 
+const initialState = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  age: "",
+};
+
+function reducer(state, action) {
+  switch (action.type) {
+    case "add":
+      return {
+        firstName: action.payload.firstName,
+        lastName: action.payload.lastName,
+        email: action.payload.email,
+        age: action.payload.age,
+      };
+
+    default:
+      throw new Error("Unexpected action");
+  }
+}
+
 export default function Home() {
+  const [state, dispatch] = React.useReducer(reducer, initialState);
   const [fieldData, setFieldData] = React.useState(TestInput);
 
   const formSubmitHandler = (event) => {
@@ -186,26 +210,35 @@ export default function Home() {
       ];
     });
 
+    dispatch({
+      type: "add",
+      payload: {
+        firstName: data.get("firstName"),
+        lastName: data.get("lastName"),
+        email: data.get("email"),
+        age: data.get("age"),
+      },
+    });
+  };
+
+  React.useEffect(() => {
+    let validatedFieldData = true;
     fieldData.forEach((section) => {
       section.fields.forEach((field) => {
         field.validations.forEach((validation) => {
-          if (validation.hasOwnProperty("isValid") && validation?.isValid) {
-            console.log(
-              data.get("firstName"),
-              data.get("lastName"),
-              data.get("email"),
-              data.get("age")
-            );
+          if (validation.hasOwnProperty("isValid") && !validation.isValid) {
+            validatedFieldData = false;
           }
           // validations
         });
-
         // field
       });
     });
 
-    
-  };
+    if (validatedFieldData) {
+      console.log(state.firstName, state.lastName, state.email, state.age);
+    }
+  }, [fieldData, state]);
 
   return (
     <div>
