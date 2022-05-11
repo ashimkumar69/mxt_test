@@ -186,12 +186,25 @@ export default function Home() {
       ];
     });
 
-    console.log(
-      data.get("firstName"),
-      data.get("lastName"),
-      data.get("email"),
-      data.get("age")
-    );
+    fieldData.forEach((section) => {
+      section.fields.forEach((field) => {
+        field.validations.forEach((validation) => {
+          if (validation.hasOwnProperty("isValid") && validation?.isValid) {
+            console.log(
+              data.get("firstName"),
+              data.get("lastName"),
+              data.get("email"),
+              data.get("age")
+            );
+          }
+          // validations
+        });
+
+        // field
+      });
+    });
+
+    
   };
 
   return (
