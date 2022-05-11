@@ -1,69 +1,233 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import styles from '../styles/Home.module.css'
+import * as React from "react";
+const TestInput = [
+  {
+    section: "Basic Information",
+    fields: [
+      {
+        name: "firstName",
+        label: "First Name",
+        type: {
+          type: "text",
+          typeValidationMessage: "This is a text field",
+        },
+        validations: [
+          {
+            required: true,
+            validationMessage: "This field is required",
+          },
+          {
+            type: "letters",
+            validationMessage: "This field supports only characters",
+          },
+          {
+            min: 2,
+            validationMessage: "Minimum field should be 2",
+          },
+          {
+            max: 100,
+            validationMessage: "Maximum field should be 100",
+          },
+        ],
+      },
+      {
+        name: "lastName",
+        label: "Last Name",
+        type: {
+          type: "text",
+          typeValidationMessage: "This is a text field",
+        },
+        validations: [
+          {
+            required: true,
+            validationMessage: "This field is required",
+          },
+          {
+            type: "letters",
+            validationMessage: "This field supports only characters",
+          },
+          {
+            min: 2,
+            validationMessage: "Minimum field should be 2",
+          },
+          {
+            max: 100,
+            validationMessage: "Maximum field should be 100",
+          },
+        ],
+      },
+      {
+        name: "email",
+        label: "Email",
+        type: {
+          type: "email",
+          typeValidationMessage: "This field requires a valid email address",
+        },
+        validations: [
+          {
+            required: true,
+            validationMessage: "This field is required",
+          },
+          {
+            min: 6,
+            validationMessage: "Minimum field should be 6",
+          },
+          {
+            max: 100,
+            validationMessage: "Maximum field should be 100",
+          },
+        ],
+      },
+      {
+        name: "age",
+        label: "Age",
+        type: {
+          type: "number",
+          typeValidationMessage: "This field requires a valid number",
+        },
+        validations: [
+          {
+            required: true,
+            validationMessage: "This field is required",
+          },
+          {
+            min: 18,
+            validationMessage: "Minimum field should be 18",
+          },
+          {
+            max: 56,
+            validationMessage: "Maximum field should be 56",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    section: "Billing Information",
+    fields: [],
+  },
+];
+
+function isTextLetter(inputTxt) {
+  const letters = /^[A-Za-z]+$/;
+  if (inputTxt.match(letters)) {
+    return "letters";
+  } else {
+    return "not letters";
+  }
+}
 
 export default function Home() {
+  const [fieldData, setFieldData] = React.useState(TestInput);
+
+  const formSubmitHandler = (event) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+
+    setFieldData((prevState) => {
+      return [
+        ...prevState.map((section) => {
+          return {
+            ...section,
+            fields: section.fields.map((field) => {
+              for (let [key, value] of data.entries()) {
+                if (field.name === key) {
+                  return {
+                    ...field,
+                    validations: field.validations.map((validation) => {
+                      if (validation.required && value && value.length > 0) {
+                        return {
+                          ...validation,
+                          isValid: true,
+                        };
+                      } else if (
+                        validation.type &&
+                        validation.type === isTextLetter(value)
+                      ) {
+                        return {
+                          ...validation,
+                          isValid: true,
+                        };
+                      } else if (
+                        validation.min &&
+                        value &&
+                        validation.min <= value.length
+                      ) {
+                        return {
+                          ...validation,
+                          isValid: true,
+                        };
+                      } else if (
+                        validation.max &&
+                        value &&
+                        validation.max >= value.length
+                      ) {
+                        return {
+                          ...validation,
+                          isValid: true,
+                        };
+                      } else {
+                        return {
+                          ...validation,
+                          isValid: false,
+                        };
+                      }
+
+                      // validations
+                    }),
+                  };
+                }
+                // loop
+              }
+
+              // field
+            }),
+          };
+        }),
+      ];
+    });
+
+    console.log(
+      data.get("firstName"),
+      data.get("lastName"),
+      data.get("email"),
+      data.get("age")
+    );
+  };
+
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <meta name="description" content="Generated by create next app" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+    <div>
+      {fieldData.map((section, index) => {
+        return (
+          <div key={index}>
+            <h3>{section.section}</h3>
+            <form onSubmit={formSubmitHandler}>
+              {section.fields.map((field, index) => {
+                return (
+                  <div key={index}>
+                    <label>{field.label}</label>
+                    <input name={field.name} type={field.type.type} />
+                    <p>{field.type.typeValidationMessage}</p>
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h2>Documentation &rarr;</h2>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h2>Learn &rarr;</h2>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/canary/examples"
-            className={styles.card}
-          >
-            <h2>Examples &rarr;</h2>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h2>Deploy &rarr;</h2>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <span className={styles.logo}>
-            <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-          </span>
-        </a>
-      </footer>
+                    {field.validations.map((validation, index) => {
+                      if (
+                        validation.hasOwnProperty("isValid") &&
+                        !validation?.isValid
+                      ) {
+                        return (
+                          <p key={index} style={{ color: "red" }}>
+                            {validation.validationMessage}
+                          </p>
+                        );
+                      }
+                    })}
+                  </div>
+                );
+              })}
+              <button type="submit">Submit</button>
+            </form>
+          </div>
+        );
+      })}
     </div>
-  )
+  );
 }
